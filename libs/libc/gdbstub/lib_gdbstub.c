@@ -1017,7 +1017,20 @@ static void gdb_get_registers(FAR struct gdb_state_s *state)
   FAR uint8_t *reg;
   int i;
 
-  reg = (FAR uint8_t *)tcb->xcp.regs;
+  if (tcb != NULL)
+    {
+      reg = (FAR uint8_t *)tcb->xcp.regs;
+    }
+  else
+    {
+      /* The thread has exited: report zeroed registers instead of
+       * dereferencing a NULL TCB.
+       */
+
+      memset(state->running_regs, 0, sizeof(state->running_regs));
+      reg = state->running_regs;
+    }
+
   if (state->pid == _SCHED_GETTID())
     {
       if (up_interrupt_context())
