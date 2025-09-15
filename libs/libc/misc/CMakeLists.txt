@@ -41,6 +41,7 @@ list(
   lib_posix_madvise.c
   lib_mutex.c
   lib_fchmodat.c
+  lib_ratelimit.c
   lib_fstatat.c
   lib_statx.c
   lib_getfullpath.c
