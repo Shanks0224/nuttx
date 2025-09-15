@@ -1,0 +1,160 @@
+/****************************************************************************
+ * include/nuttx/ratelimit.h
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ *
+ ****************************************************************************/
+
+#ifndef __INCLUDE_NUTTX_RATELIMIT_H
+#define __INCLUDE_NUTTX_RATELIMIT_H
+
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#include <nuttx/config.h>
+
+#include <sys/types.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <time.h>
+
+#include <nuttx/spinlock_type.h>
+#include <pthread.h>
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#if defined(__KERNEL__) || defined(CONFIG_BUILD_FLAT)
+#define RATELIMIT_STATE_INITIALIZER(interval_init, burst_init) \
+  {                                                            \
+    .lock     = { .spin = SP_UNLOCKED },                       \
+    .interval = interval_init,                                 \
+    .burst    = burst_init,                                    \
+    .begin    = 0,                                             \
+    .count    = 0,                                             \
+    .missed   = 0,                                             \
+  }
+#else
+#define RATELIMIT_STATE_INITIALIZER(interval_init, burst_init) \
+  {                                                            \
+    .lock     = { .mutex = PTHREAD_MUTEX_INITIALIZER },        \
+    .interval = interval_init,                                 \
+    .burst    = burst_init,                                    \
+    .begin    = 0,                                             \
+    .count    = 0,                                             \
+    .missed   = 0,                                             \
+  }
+#endif
+
+#define DEFINE_RATELIMIT_STATE(name, interval_init, burst_init) \
+  struct ratelimit_state_s name =                               \
+  RATELIMIT_STATE_INITIALIZER(interval_init, burst_init)
+
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
+/* Rate limiting is carried out according to the time window. The
+ * flow within a fixed time window is not allowed to exceed the
+ * maximum burst value.
+ */
+
+struct ratelimit_state_s
+{
+  /* A lock used to protect the current-limiting state. */
+
+  union
+    {
+      spinlock_t spin;
+      pthread_mutex_t mutex;
+    } lock;
+
+  unsigned int interval;    /* The size of the time window (in seconds). */
+  unsigned int burst;       /* The burst traffic allowed within the window. */
+  unsigned int count;       /* The number of events that have occurred. */
+  unsigned int missed;      /* The number of missed (suppressed) events. */
+  clock_t begin;            /* The timestamp of the beginning of the window. */
+};
+
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+/****************************************************************************
+ * Name: ratelimit_islimited
+ *
+ * Description:
+ *   Rate limiting is carried out according to the time window.
+ *
+ ****************************************************************************/
+
+bool ratelimit_islimited(FAR struct ratelimit_state_s *state);
+
+/****************************************************************************
+ * Name: ratelimit_setlimit
+ *
+ * Description:
+ *   Update the rate limiting parameters (time window and burst). The
+ *   accounting window is reset so that the new setting takes effect from a
+ *   fresh time window.
+ *
+ ****************************************************************************/
+
+void ratelimit_setlimit(FAR struct ratelimit_state_s *state,
+                        unsigned int interval, unsigned int burst);
+
+/****************************************************************************
+ * Name: ratelimit_getlimit
+ *
+ * Description:
+ *   Read back the current rate limiting parameters.  NULL output pointers
+ *   are ignored.
+ *
+ ****************************************************************************/
+
+void ratelimit_getlimit(FAR struct ratelimit_state_s *state,
+                        FAR unsigned int *interval, FAR unsigned int *burst);
+
+/****************************************************************************
+ * Name: ratelimit_missed
+ *
+ * Description:
+ *   Return the number of missed (suppressed) events and reset the counter.
+ *
+ ****************************************************************************/
+
+static inline unsigned int ratelimit_missed(
+    FAR struct ratelimit_state_s *state)
+{
+  unsigned int missed = state->missed;
+  state->missed = 0;
+  return missed;
+}
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* __INCLUDE_NUTTX_RATELIMIT_H */
