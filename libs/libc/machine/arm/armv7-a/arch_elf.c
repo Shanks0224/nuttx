@@ -182,8 +182,8 @@ int up_relocate(const Elf32_Rel *rel, const Elf32_Sym *sym, uintptr_t addr,
             offset >= (int32_t) 0x02000000)
           {
             berr("ERROR: PC24 [%" PRId32 "] relocation out of range, "
-                 "offset=%08lx\n",
-                 ELF32_R_TYPE(rel->r_info), offset);
+                 "offset=%08" PRIx32 "\n",
+                 ELF32_R_TYPE(rel->r_info), (uint32_t)offset);
 
             return -EINVAL;
           }
