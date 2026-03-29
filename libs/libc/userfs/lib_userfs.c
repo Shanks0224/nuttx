@@ -697,7 +697,7 @@ static inline int userfs_rmdir_dispatch(FAR struct userfs_info_s *info,
 
   /* Verify the request size */
 
-  if (reqlen < SIZEOF_USERFS_MKDIR_REQUEST_S(0))
+  if (reqlen < SIZEOF_USERFS_RMDIR_REQUEST_S(0))
     {
       return -EINVAL;
     }
@@ -708,7 +708,7 @@ static inline int userfs_rmdir_dispatch(FAR struct userfs_info_s *info,
       return -EINVAL;
     }
 
-  expected = SIZEOF_USERFS_MKDIR_REQUEST_S(pathlen);
+  expected = SIZEOF_USERFS_RMDIR_REQUEST_S(pathlen);
   if (expected > reqlen)
     {
       return -EINVAL;
