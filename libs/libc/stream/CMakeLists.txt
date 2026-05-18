@@ -51,6 +51,10 @@ list(
   lib_libvsprintf.c
   lib_ultoa_invert.c)
 
+if(CONFIG_NET_NETPOLL)
+  list(APPEND SRCS lib_netpolloutstream.c)
+endif()
+
 if(NOT CONFIG_STREAM_OUT_BUFFER_SIZE EQUAL 0)
   list(APPEND SRCS lib_bufferedoutstream.c)
 endif()
