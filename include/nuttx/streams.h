@@ -358,6 +358,15 @@ struct lib_blkoutstream_s
   struct geometry        geo;
   FAR unsigned char     *cache;
 };
+
+struct lib_blksistream_s
+{
+  struct lib_sistream_s  common;
+  FAR struct inode      *inode;
+  struct geometry        geo;
+  FAR unsigned char     *cache;
+  off_t                  sector;
+};
 #endif
 
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && defined(CONFIG_MTD)
@@ -808,6 +817,41 @@ int lib_blkoutstream_open(FAR struct lib_blkoutstream_s *stream,
 
 #ifndef CONFIG_DISABLE_MOUNTPOINT
 void lib_blkoutstream_close(FAR struct lib_blkoutstream_s *stream);
+#endif
+
+/****************************************************************************
+ * Name: lib_blksistream_open
+ *
+ * Description:
+ *   Open a seekable block device input stream.
+ *
+ * Input Parameters:
+ *   stream  - User allocated instance of struct lib_blksistream_s.
+ *   name    - Block device path (e.g., "/dev/virtblk2").
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_DISABLE_MOUNTPOINT
+int lib_blksistream_open(FAR struct lib_blksistream_s *stream,
+                         FAR const char *name);
+#endif
+
+/****************************************************************************
+ * Name: lib_blksistream_close
+ *
+ * Description:
+ *   Close a block device input stream and release resources.
+ *
+ * Input Parameters:
+ *   stream  - Instance previously opened with lib_blksistream_open.
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_DISABLE_MOUNTPOINT
+void lib_blksistream_close(FAR struct lib_blksistream_s *stream);
 #endif
 
 /****************************************************************************

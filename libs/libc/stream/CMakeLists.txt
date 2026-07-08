@@ -83,6 +83,7 @@ endif()
 if(NOT CONFIG_DISABLE_MOUNTPOINT)
   list(APPEND SRCS lib_blkoutstream.c)
   list(APPEND SRCS lib_mtdsistream.c)
+  list(APPEND SRCS lib_blksistream.c)
 endif()
 
 target_sources(c PRIVATE ${SRCS})
