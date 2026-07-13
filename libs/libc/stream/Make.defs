@@ -63,6 +63,7 @@ endif
 
 ifeq ($(CONFIG_DISABLE_MOUNTPOINT),)
 CSRCS += lib_blkoutstream.c
+CSRCS += lib_mtdsistream.c
 endif
 
 # Add the stdio directory to the build
