@@ -242,7 +242,7 @@ struct lib_fileinstream_s
 
 struct lib_fileoutstream_s
 {
-  struct lib_outstream_s common;
+  struct lib_sostream_s  common;
   struct file            file;
 };
 
