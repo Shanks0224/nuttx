@@ -192,7 +192,7 @@ int up_relocate(const Elf32_Rel *rel, const Elf32_Sym *sym, uintptr_t addr,
                           * performs a self relocation */
       {
         binfo("Performing TARGET2 link "
-              "at addr=%08" PRIx32 " [%08" PRIx32 "] to "
+              "at addr=%08" PRIxPTR " [%08" PRIx32 "] to "
               "sym=%p st_value=%08" PRIx32 "\n",
               addr, *(uint32_t *)addr, sym, sym->st_value);
 
