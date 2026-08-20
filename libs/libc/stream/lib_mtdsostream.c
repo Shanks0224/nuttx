@@ -66,6 +66,10 @@ static int mtdsostream_flush(FAR struct lib_sostream_s *self)
 
       ret = MTD_BWRITE(mtd, sblock * nblkpererase,
                        nblkpererase, stream->cache);
+      if (ret != nblkpererase)
+        {
+          return ret < 0 ? ret : -EIO;
+        }
     }
 
   return ret;
@@ -119,9 +123,9 @@ static ssize_t mtdsostream_puts(FAR struct lib_sostream_s *self,
 
               ret = MTD_BWRITE(mtd, sblock * nblkpererase,
                                nblkpererase, stream->cache);
-              if (ret < 0)
+              if (ret != nblkpererase)
                 {
-                  return ret;
+                  return ret < 0 ? ret : -EIO;
                 }
             }
         }
@@ -129,9 +133,9 @@ static ssize_t mtdsostream_puts(FAR struct lib_sostream_s *self,
         {
           ret = MTD_BREAD(mtd, sblock * nblkpererase,
                           nblkpererase, stream->cache);
-          if (ret < 0)
+          if (ret != nblkpererase)
             {
-              return ret;
+              return ret < 0 ? ret : -EIO;
             }
 
           memcpy(stream->cache, ptr, remain);
@@ -151,9 +155,9 @@ static ssize_t mtdsostream_puts(FAR struct lib_sostream_s *self,
 
           ret = MTD_BWRITE(mtd, sblock * nblkpererase,
                            nblock * nblkpererase, ptr);
-          if (ret < 0)
+          if (ret != nblock * nblkpererase)
             {
-              return ret;
+              return ret < 0 ? ret : -EIO;
             }
 
           ptr        += copying;
@@ -232,9 +236,9 @@ static off_t mtdsostream_seek(FAR struct lib_sostream_s *self,
 
       ret = MTD_BWRITE(mtd, block * nblkpererase,
                        nblkpererase, stream->cache);
-      if (ret < 0)
+      if (ret != nblkpererase)
         {
-          return ret;
+          return ret < 0 ? ret : -EIO;
         }
     }
 
@@ -244,9 +248,9 @@ static off_t mtdsostream_seek(FAR struct lib_sostream_s *self,
 
       ret = MTD_BREAD(mtd, block * nblkpererase,
                       nblkpererase, stream->cache);
-      if (ret < 0)
+      if (ret != nblkpererase)
         {
-          return ret;
+          return ret < 0 ? ret : -EIO;
         }
     }
 
