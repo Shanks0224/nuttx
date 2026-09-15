@@ -313,6 +313,7 @@ struct lib_lzfsistream_s
 {
   struct lib_sistream_s      common;
   FAR struct lib_sistream_s *backend;
+  off_t                      base;
   off_t                      offset;
   off_t                      blkoff;
   off_t                      blkcoff;
